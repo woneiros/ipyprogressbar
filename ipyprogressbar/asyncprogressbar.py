@@ -23,14 +23,14 @@ from IPython.display import display
 class AsyncProgressBar(object):
     """docstring for AsyncProgressBar"""
 
-    INIT_SCRIPT = "<script>var stepUpdate = {t}*10;</script>"
+    INIT_SCRIPT = "<script> var pbId = '#{i}'; var stepUpdate = {t}*10;</script>"
     RUN_SCRIPT = """
         <script>
             var progress = 0;
             var timer = setInterval(updateProgressBar, stepUpdate);
 
             function updateProgressBar(){
-                $(#pb_id).progressbar({
+                $(pbId).progressbar({
                     value: ++progress
                 });
                 if(progress == 100)
@@ -38,20 +38,21 @@ class AsyncProgressBar(object):
             }
 
             $(function () {
-                $(#pb_id).progressbar({
+                $(pbId).progressbar({
                     value: progress
                 });
             });
         </script>
         """
 
-    def __init__(self, time, width=None, height=None):
+    def __init__(self, time, identifier=None, width=None, height=None):
+        self._id = identifier if identifier is not None else str(random.random()).replace('0.', '')
         self.total_time = time
         self.width = width if width is not None else '50%'
         self.height = height if height is not None else '20px'
 
-        html_init = '<div style="width: {w}, height: {h};" id="#pb_id"></div>'
-        self.WIDGET = widgets.HTML( value=html_init.format(w=self.widgets, h=self.height) )
+        html_init = '<div style="width: {w}, height: {h};" id="{i}"></div>'
+        self.WIDGET = widgets.HTML( value=html_init.format(i=self._id, w=self.widgets, h=self.height) )
         self.WIDGET.visible = False
 
     def get_widget(self):
@@ -59,7 +60,7 @@ class AsyncProgressBar(object):
 
     def run(self):
         self.WIDGET.visible = True
-        display( widgets.HTML(value=self.INIT_SCRIPT.format(t=self.total_time) + self.RUN_SCRIPT) )
+        display( widgets.HTML(value=self.INIT_SCRIPT.format(i=self._id, t=self.total_time) + self.RUN_SCRIPT) )
 
     def hide(self):
         self.WIDGET.visible = False
