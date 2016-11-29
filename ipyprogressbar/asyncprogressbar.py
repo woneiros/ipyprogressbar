@@ -60,3 +60,6 @@ class AsyncProgressBar(object):
     def run(self):
         self.WIDGET.visible = True
         display( widgets.HTML(value=self.INIT_SCRIPT.format(t=self.total_time) + self.RUN_SCRIPT) )
+
+    def hide(self):
+        self.WIDGET.visible = False
