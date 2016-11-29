@@ -45,22 +45,23 @@ class AsyncProgressBar(object):
         </script>
         """
 
-    def __init__(self, time, identifier=None, width=None, height=None):
+    def __init__(self, time, description='', identifier=None, width=None, height=None):
         self._id = identifier if identifier is not None else str(random.random()).replace('0.', '')
         self.total_time = time
         self.width = width if width is not None else '50%'
         self.height = height if height is not None else '20px'
 
-        html_init = '<div style="width: {w}, height: {h};" id="{i}"></div>'
-        self.WIDGET = widgets.HTML( value=html_init.format(i=self._id, w=self.widgets, h=self.height) )
+        html_init = '{d}<div style="width: {w}, height: {h};" id="{i}"></div>'
+        self.WIDGET = widgets.HTML( value=html_init.format(d=description, i=self._id, w=self.widgets, h=self.height) )
         self.WIDGET.visible = False
 
     def get_widget(self):
         return self.WIDGET
 
-    def run(self):
+    def run(self, time=None):
+        _time = time if time is not None else self.total_time
         self.WIDGET.visible = True
-        display( widgets.HTML(value=self.INIT_SCRIPT.format(i=self._id, t=self.total_time) + self.RUN_SCRIPT) )
+        display( widgets.HTML(value=self.INIT_SCRIPT.format(i=self._id, t=_time) + self.RUN_SCRIPT) )
 
     def hide(self):
         self.WIDGET.visible = False
