@@ -60,7 +60,7 @@ class AsyncProgressBar(object):
         self.height = height if height is not None else '20px'
 
         html_init = '{d}<div style="width: {w}, height: {h};" id="{i}"></div>'
-        self.WIDGET = widgets.HTML( value=html_init.format(d=description, i=self._id, w=self.widgets, h=self.height) )
+        self.WIDGET = widgets.HTML( value=html_init.format(d=description, i=self._id, w=self.width, h=self.height) )
         self.WIDGET.visible = False
 
     def get_widget(self):
