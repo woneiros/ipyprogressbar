@@ -1,5 +1,8 @@
 ## IPyProgressBar
-Is a small package that provides an python-asynchronous progressbar widgets for use in Jupyter/IPython in conjunction with `ipywidgets`.
+
+[![saythanks](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/WillahScott)
+
+A small package that provides an python-asynchronous progressbar widgets for use in Jupyter/IPython in conjunction with `ipywidgets`.
 
 ### Why
 
@@ -41,6 +44,3 @@ my_progressbar.hide()
 ### Contact
 
 Created by: [WillahScott](https://github.com/WillahScott/)
-
-## Say Thanks!
-https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg
