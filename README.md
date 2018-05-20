@@ -41,3 +41,6 @@ my_progressbar.hide()
 ### Contact
 
 Created by: [WillahScott](https://github.com/WillahScott/)
+
+## Say Thanks!
+https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg
