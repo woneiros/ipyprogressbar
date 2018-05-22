@@ -34,13 +34,27 @@ my_progressbar.display()
 my_progressbar.run()
 ```
 
-The object also has a `hide()` method, for a typical use case in which we just want a temporal progressbar:
+The object also has a `close()` method (and its inverse `reopen()`), for hiding the progressbar whenever we want:
 
 ```python
 my_progressbar.run()
 function_that_takes_long()
 my_progressbar.close(on_finish=True)  # or set close_on_finish=True on creating the progressbar object
 ```
+
+However,for a typical use case in which we just want a temporal progressbar, we can specify the `close_on_finish` on creation:
+
+```python
+# Create the progress bar object (not the widget)
+my_progressbar = AsyncProgressBar(time=2, description='Loading dataset:', close_on_finish=True)
+
+# ...
+
+# Trigger the progressbar
+my_progressbar.run()  # when done the progress bar will hide
+```
+
+
 
 ### Contact
 
