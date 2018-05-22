@@ -12,7 +12,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setuptools.setup(
 	name='ipyprogressbar',
-	version='0.1.0',
+	version='1.0.0',
 	description='Python-asynchronous progressbar widgets for use in Jupyter/IPython in conjunction with ipywidgets',
 	long_description=long_description,
 	long_description_content_type='text/markdown',

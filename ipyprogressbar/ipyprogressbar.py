@@ -10,11 +10,13 @@
 """
 
 import random
+import time as tm
+import threading
 import ipywidgets as widgets
 from IPython.display import display
 
 class AsyncProgressBar(object):
-    """Progressbar that executes asynchronously (while other python code executes)
+    """Progressbar that executes asynchronously in a thread, while other python code executes
 
     Parameters
     ----------
@@ -22,48 +24,22 @@ class AsyncProgressBar(object):
         Number of seconds the progressbar will take to complete
     description : str, optional
         Label to be shown next to the progressbar
-    identifier : str, optional
-        Identifier of this specific progressbar (to avoid collision with other progressbars)
-        If no string is passed a random string of numbers will be used as suffix to 'pb_'
-    width : int, optional
-        Width of the progressbar
-    height : int, optional
-        Height of the progressbar
+    close_on_finish : bool, optional
+        Automatically close the progressbar upon completion
     """
 
-    INIT_SCRIPT = "<script> var pbId = '#{i}'; var stepUpdate = {t}*10;</script>"
-    RUN_SCRIPT = """
-        <script>
-            var progress = 0;
-            var timer = setInterval(updateProgressBar, stepUpdate);
-
-            function updateProgressBar(){
-                $(pbId).progressbar({
-                    value: ++progress
-                });
-                if(progress == 100)
-                    clearInterval(timer);
-            }
-
-            $(function () {
-                $(pbId).progressbar({
-                    value: progress
-                });
-            });
-        </script>
-        """
-
-    def __init__(self, time, description='', identifier=None, width=None, height=None):
+    def __init__(self, time, description='', identifier=None, close_on_finish=False):
         self._id = identifier if identifier is not None else 'pb_' + str(random.random()).replace('0.', '')
         self.total_time = time
-        self.width = width if width is not None else '50%'
-        self.height = height if height is not None else '20px'
+        self.close_on_finish = close_on_finish
+        self.__widget = widgets.IntProgress(value=0, min=0, max=100)
+        self.__widget.description = description
+        self.__last_value = None
+        self.__last_description = description
 
-        html_init = '{d}<div style="width: {w}, height: {h};" id="{i}"></div>'
-        self.WIDGET = widgets.HTML( value=html_init.format(d=description, i=self._id, w=self.width, h=self.height) )
-        self.WIDGET.visible = False
 
-    def get_widget(self):
+    @property
+    def widget(self):
         """Returns the widget object to be displayed or included in a dashboard
 
         Returns
@@ -71,7 +47,22 @@ class AsyncProgressBar(object):
         `ipywidgets.widget<>`_
             Widget
         """
-        return self.WIDGET
+        return self.__widget
+
+
+    def display(self):
+        display(self.widget)
+
+
+    def __fill_bar(self, time):
+        while self.__widget.value < 100:
+            tm.sleep(time / 20)
+            self.__widget.value += 5
+
+        # Close if on_finish option was specified
+        if self.close_on_finish:
+            self.__widget.close()
+
 
     def run(self, time=None):
         """Triggers the progressbar to start updating (like an animation)
@@ -83,10 +74,39 @@ class AsyncProgressBar(object):
             If given overrides the time specified on instantiation
         """
         _time = time if time is not None else self.total_time
-        self.WIDGET.visible = True
-        display( widgets.HTML(value=self.INIT_SCRIPT.format(i=self._id, t=_time) + self.RUN_SCRIPT) )
+        thread = threading.Thread(target=self.__fill_bar, args=(_time,)) 
+        thread.start()
 
-    def hide(self):
-        """Hides the progressbar (sets widget.visible to False)
+
+    def reset(self, percent=0):
+        """Reset the progressbar to the specified percent (defaults to zero)
+
+        Parameters
+        ----------
+        percent : int [0,100], optional
+            Int between 0 (empty) and 100 (full) to reset the progressbar to
         """
-        self.WIDGET.visible = False
+        self.__widget.value = percent
+
+
+    def close(self, on_finish=True):
+        """Close the widget
+
+        Parameters
+        ----------
+        on_finish : bool, optional
+            Should the widget close when it reaches 100% (default), if not
+            the widget will close automatically (even if it's still running)
+        """
+        if on_finish:
+            self.close_on_finish = True
+        else:
+            self.__last_value = self.__widget.value
+            self.__widget.close()
+
+
+    def reopen(self):
+        """Reopen the widget after closing, with the previous last value"""
+        self.__widget = widgets.IntProgress(value=0, min=0, max=100)
+        self.__widget.value = self.__last_value if self.__last_value else 0
+        self.__widget.description = self.__last_description
